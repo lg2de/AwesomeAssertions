@@ -339,7 +339,7 @@ public abstract class SelfReferenceEquivalencyOptions<TSelf> : IEquivalencyOptio
         return (TSelf)this;
     }
 
-    public TSelf ExcludeObsoleteMembers()
+    public TSelf ExcludingObsoleteMembers()
     {
         excludeObsoleteMembers = true;
         return (TSelf)this;
