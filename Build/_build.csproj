@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Cake.Frosting" Version="6.2.0" />
-    <PackageReference Include="LibGit2Sharp" Version="0.31.0" />
+    <PackageReference Include="Cake.Git" Version="5.0.1" />
     <PackageReference Include="SharpCompress" Version="0.48.0" />
   </ItemGroup>
 </Project>

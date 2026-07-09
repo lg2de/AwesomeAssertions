@@ -6,7 +6,7 @@ using Cake.Common.Tools.GitVersion;
 using Cake.Core;
 using Cake.Core.IO;
 using Cake.Frosting;
-using LibGit2Sharp;
+using Cake.Git;
 
 namespace Build;
 
@@ -37,10 +37,7 @@ public class BuildContext : FrostingContext
             "pull_request",
             StringComparison.OrdinalIgnoreCase);
 
-        string gitDirectory = LibGit2Sharp.Repository.Discover(context.Environment.WorkingDirectory.FullPath);
-        using var repository = new LibGit2Sharp.Repository(gitDirectory);
-        RootDirectory = new DirectoryPath(repository.Info.WorkingDirectory);
-        GitDirectory = gitDirectory;
+        RootDirectory = context.GitFindRootFromPath(context.Environment.WorkingDirectory);
     }
 
     public bool IsLocalBuild { get; }
@@ -60,8 +57,6 @@ public class BuildContext : FrostingContext
     public bool IsPullRequest { get; }
 
     public DirectoryPath RootDirectory { get; }
-
-    string GitDirectory { get; }
 
     /// <summary>
     /// Failures of tasks that are allowed to proceed after failure; re-thrown by the Default task.
@@ -102,13 +97,20 @@ public class BuildContext : FrostingContext
 
     string[] CalculateChanges()
     {
-        using var repository = new LibGit2Sharp.Repository(GitDirectory);
+        ICollection<GitBranch> branches = this.GitBranches(RootDirectory);
 
-        Tree targetBranch = repository.Branches[PullRequestBase].Tip.Tree;
-        Tree sourceBranch = repository.Branches[repository.Head.FriendlyName].Tip.Tree;
+        GitBranch baseBranch =
+            branches.FirstOrDefault(b => b.FriendlyName == PullRequestBase)
+            ?? branches.FirstOrDefault(b => b.FriendlyName.EndsWith("/" + PullRequestBase, StringComparison.Ordinal));
 
-        return repository.Diff
-            .Compare<TreeChanges>(targetBranch, sourceBranch)
+        if (baseBranch == null)
+        {
+            return [];
+        }
+
+        string headSha = this.GitBranchCurrent(RootDirectory).Tip.Sha;
+
+        return this.GitDiff(RootDirectory, baseBranch.Tip.Sha, headSha)
             .Where(x => x.Exists)
             .Select(x => x.Path)
             .ToArray();
