@@ -1,15 +1,19 @@
 using System.IO;
-using Nuke.Common.IO;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 
+namespace Build;
+
 public static class CompressionExtensions
 {
-    public static void UnTarXzTo(this AbsolutePath archive, AbsolutePath directory)
+    /// <summary>
+    /// Extracts a compressed tar archive (.tar.gz or .tar.xz). The compression method is detected
+    /// automatically by SharpCompress' reader factory.
+    /// </summary>
+    public static void ExtractTar(string archive, string directory)
     {
         using Stream stream = File.OpenRead(archive);
-
-        using var reader = ReaderFactory.OpenReader(stream);
+        using IReader reader = ReaderFactory.OpenReader(stream);
 
         while (reader.MoveToNextEntry())
         {
@@ -21,7 +25,7 @@ public static class CompressionExtensions
             reader.WriteEntryToDirectory(directory, new ExtractionOptions
             {
                 ExtractFullPath = true,
-                Overwrite = true
+                Overwrite = true,
             });
         }
     }

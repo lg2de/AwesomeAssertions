@@ -23,14 +23,14 @@ jobs:
           8.0.x
           10.0.x
 
-    - name: Cache .nuke/temp
+    - name: Cache node runtime
       uses: actions/cache@v6
       with:
         path: |
-          .nuke/temp
+          .cake/node
         key: ${{ runner.os }}-${{ hashFiles('NodeVersion') }}
 
-    - name: Run NUKE
+    - name: Run Cake
       run: ./build.ps1
       env:
         NuGetApiKey: ${{ secrets.NUGETAPIKEY }}
@@ -78,8 +78,8 @@ jobs:
           8.0.x
           10.0.x
 
-    - name: Run NUKE
-      run: ./build.sh UnitTests
+    - name: Run Cake
+      run: ./build.sh --target UnitTests
 
     - name: Upload artifacts
       if: always()

@@ -13,6 +13,12 @@ project.lock.json
 *.nuget.props
 *.nuget.targets
 
+# Cake build
+.tmp/
+.cake/
+/tools/
+TestResults/
+
 # Build results
 Artifacts/
 [Dd]ebug/
